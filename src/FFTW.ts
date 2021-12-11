@@ -1,27 +1,27 @@
 import type { FFT, FFTWModule } from "./types";
 
-const FFTW_ESTIMATE = (1 << 6);
-
-const FFTW_R2HC = 0;
-const FFTW_HC2R = 1;
-const FFTW_DHT = 2;
-const FFTW_REDFT00 = 3;
-const FFTW_REDFT10 = 5;
-const FFTW_REDFT01 = 4;
-const FFTW_REDFT11 = 6;
-const FFTW_RODFT00 = 7;
-const FFTW_RODFT10 = 9;
-const FFTW_RODFT01 = 8;
-const FFTW_RODFT11 = 10;
-
-const FFTW_FORWARD = -1;
-const FFTW_BACKWARD = 1;
-
 class FFTW {
     c2c: { FFT1D: new (size: number) => FFT; FFT2D: new (n0: number, n1: number) => FFT; };
     r2c: { FFT1D: new (size: number) => FFT; };
     r2r: { FFT1D: new (size: number) => FFT; DCT1D: new (size: number) => FFT; DST1D: new (size: number) => FFT; FFT2D: new (n0: number, n1: number) => FFT; DCT2D: new (n0: number, n1: number) => FFT; DST2D: new (n0: number, n1: number) => FFT; };
     constructor(fftwModule: FFTWModule) {
+        const FFTW_ESTIMATE = (1 << 6);
+        
+        const FFTW_R2HC = 0;
+        const FFTW_HC2R = 1;
+        const FFTW_DHT = 2;
+        const FFTW_REDFT00 = 3;
+        const FFTW_REDFT10 = 5;
+        const FFTW_REDFT01 = 4;
+        const FFTW_REDFT11 = 6;
+        const FFTW_RODFT00 = 7;
+        const FFTW_RODFT10 = 9;
+        const FFTW_RODFT01 = 8;
+        const FFTW_RODFT11 = 10;
+        
+        const FFTW_FORWARD = -1;
+        const FFTW_BACKWARD = 1;
+        
         const fftwf_plan_dft_r2c_1d = fftwModule.cwrap(
             "fftwf_plan_dft_r2c_1d", "number", ["number", "number", "number", "number"]
         );

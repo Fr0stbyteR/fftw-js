@@ -3,6 +3,7 @@
 /// <reference types="emscripten" />
 /// <reference types="node" />
 
+export declare type FFTWModuleFactory = EmscriptenModuleFactory<FFTWModule>;
 export interface FFTWModule extends EmscriptenModule {
 	ccall: typeof ccall;
 	cwrap: typeof cwrap;
@@ -12,7 +13,7 @@ export interface FFT {
 	inverse(arr: ArrayLike<number>): Float32Array;
 	dispose(): void;
 }
-declare class FFTW {
+export declare class FFTW {
 	c2c: {
 		FFT1D: new (size: number) => FFT;
 		FFT2D: new (n0: number, n1: number) => FFT;
@@ -30,7 +31,13 @@ declare class FFTW {
 	};
 	constructor(fftwModule: FFTWModule);
 }
-declare const instantiateFFTW: () => Promise<FFTW>;
+export declare const LibFFTW: FFTWModuleFactory;
+declare const url: Uint8Array;
+declare const instantiateFFTW: (FFTWIn?: typeof FFTW, LibFFTWIn?: FFTWModuleFactory, wasmBinaryIn?: Uint8Array) => Promise<FFTW>;
 export default instantiateFFTW;
+
+export {
+	url as wasmBinary,
+};
 
 export {};

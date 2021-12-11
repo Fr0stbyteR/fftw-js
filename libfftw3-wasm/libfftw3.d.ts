@@ -1,3 +1,3 @@
 import { FFTWModuleFactory } from "../src/types";
-declare const FFTW: FFTWModuleFactory;
-export default FFTW;
+declare const LibFFTW: FFTWModuleFactory;
+export default LibFFTW;
