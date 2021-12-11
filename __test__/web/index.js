@@ -37,10 +37,18 @@
      * @param {Uint8Array} wasmBinaryIn
      */
     const injector = async (instantiateLibFFTWIn, FFTWIn, LibFFTWIn, wasmBinaryIn) => {
-        globalThis.window = {};
-        globalThis._scriptDir = "";
+        const needWindow = !globalThis.window;
+        if (needWindow) {
+            // @ts-ignore
+            globalThis.window = {};
+            globalThis._scriptDir = "";
+        }
         const fftw = await instantiateLibFFTWIn(FFTWIn, LibFFTWIn, wasmBinaryIn);
-        delete globalThis.window;
+        if (needWindow) {
+            delete globalThis.window;
+            delete globalThis._scriptDir;
+        }
+        const sampleRate = globalThis.sampleRate || 48000;
         const size = 1024;
         const signal = new Float32Array(size);
         const freq = 440;
