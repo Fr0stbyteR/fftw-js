@@ -8,9 +8,9 @@
         signal[i] = Math.sin(i / sampleRate * Math.PI * 2 * freq);
     }
     console.log(signal);
-    const { FFTW, instantiateFFTWModule } = await import("../../dist/esm/index.js");
+    const { FFTW, instantiateFFTWModuleFromFile } = await import("../../dist/esm/index.js");
     const fftModuleUri = "../../libfftw3-wasm/libfftw3.js";
-    const fftwModule = await instantiateFFTWModule(fftModuleUri);
+    const fftwModule = await instantiateFFTWModuleFromFile(fftModuleUri);
     const fftw = new FFTW(fftwModule);
     const fft = new fftw.r2r.FFT1D(size);
     const result = fft.forward(signal);
@@ -29,25 +29,11 @@
 })();
 
 (async () => {
-    const { FFTW, wasmBinary, LibFFTW, default: instantiateLibFFTW } = await import("../../dist/esm-bundle/index.js");
-    /**
-     * @param {typeof instantiateLibFFTW} instantiateLibFFTWIn
-     * @param {typeof FFTW} FFTWIn
-     * @param {typeof LibFFTW} LibFFTWIn
-     * @param {Uint8Array} wasmBinaryIn
-     */
-    const injector = async (instantiateLibFFTWIn, FFTWIn, LibFFTWIn, wasmBinaryIn) => {
-        const needWindow = !globalThis.window;
-        if (needWindow) {
-            // @ts-ignore
-            globalThis.window = {};
-            globalThis._scriptDir = "";
-        }
-        const fftw = await instantiateLibFFTWIn(FFTWIn, LibFFTWIn, wasmBinaryIn);
-        if (needWindow) {
-            delete globalThis.window;
-            delete globalThis._scriptDir;
-        }
+    const injector = async () => {
+        /** @type {typeof import("../../dist/esm-bundle/index.js")} */
+        const { FFTW, instantiateFFTWModule } = fftwwasm;
+        const fftwModule = await instantiateFFTWModule();
+        const fftw = new FFTW(fftwModule);
         const sampleRate = globalThis.sampleRate || 48000;
         const size = 1024;
         const signal = new Float32Array(size);
@@ -73,14 +59,10 @@
     };
     const ctx = new AudioContext();
     const str = `
-(${injector.toString()})(
-    ${instantiateLibFFTW.toString()},
-    ${FFTW.toString()},
-    ${LibFFTW.toString()},
-    new Uint8Array([${wasmBinary.toString()}])
-);
+(${injector.toString()})();
 `;
     const blob = new Blob([str], { type: "text/javascript" });
     const url = URL.createObjectURL(blob);
+    await ctx.audioWorklet.addModule("../../dist/cjs-bundle/index.js");
     await ctx.audioWorklet.addModule(url);
 })();

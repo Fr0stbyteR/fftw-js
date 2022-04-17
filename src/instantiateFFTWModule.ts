@@ -1,23 +1,30 @@
-import fetchModule from "./fetchModule";
-import type { FFTWModuleFactory } from "./types";
+import LibFFTWIn from "../libfftw3-wasm/libfftw3.cjs";
+import wasmBinary from "../libfftw3-wasm/libfftw3.wasm";
+
+export const LibFFTW = LibFFTWIn;
+export const LibFFTWWasm = wasmBinary;
 
 /**
- * Load fftw-wasm files, than instantiate fftw
- * @param jsFile path to `libfftw3.js`
- * @param wasmFile path to `libfftw3.wasm`
+ * Instantiate EMCC Module using bundled binaries. Module constructor and files can be overriden.
  */
-const instantiateFFTWModule = async (jsFile: string, wasmFile = jsFile.replace(/c?js$/, "wasm")) => {
-    let LibFFTW: FFTWModuleFactory;
-    try {
-        LibFFTW = require(jsFile);
-    } catch (error) {
-        LibFFTW = await fetchModule(jsFile);
+const instantiateFFTWModule = async (ModuleIn = LibFFTW, wasmBinaryIn = wasmBinary) => {
+    const g = globalThis as any;
+    if (g.AudioWorkletGlobalScope) {
+        g.importScripts = () => {};
+        g.self = { location: { href: "" } };
     }
-    const locateFile = (url: string, scriptDirectory: string) => ({
-        "libfftw3.wasm": wasmFile
-    }[url]) || scriptDirectory + url;
-    const libFaust = await LibFFTW({ locateFile });
-    return libFaust;
+    const module = await ModuleIn({
+        wasmBinary: wasmBinaryIn/*,
+        getPreloadedPackage: (remotePackageName: string, remotePackageSize: number) => {
+            if (remotePackageName === "libfaust-wasm.data") return dataBinaryIn.buffer;
+            return new ArrayBuffer(0);
+        }*/
+    });
+    if (g.AudioWorkletGlobalScope) {
+		delete g.importScripts;
+		delete g.self;
+    }
+    return module;
 };
 
 export default instantiateFFTWModule;

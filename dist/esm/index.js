@@ -1,68 +1,69 @@
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined")
-    return require.apply(this, arguments);
-  throw new Error('Dynamic require of "' + x + '" is not supported');
-});
+// src/instantiateFFTWModuleFromFile.ts
+var instantiateFFTWModuleFromFile = async (jsFile, wasmFile = jsFile.replace(/c?js$/, "wasm"), dataFile = jsFile.replace(/c?js$/, "data")) => {
+  let Module;
+  let wasmBinary;
+  if (typeof globalThis.fetch === "function") {
+    let jsCode = await (await fetch(jsFile)).text();
+    jsCode = `${jsCode}
+export default ${jsCode.match(/var (.+) = \(function\(\) \{/)[1]};
+`;
+    const jsFileMod = URL.createObjectURL(new Blob([jsCode], { type: "text/javascript" }));
+    Module = (await import(
+      /* webpackIgnore: true */
+      jsFileMod
+    )).default;
+    wasmBinary = new Uint8Array(await (await fetch(wasmFile)).arrayBuffer());
+  } else {
+    const { promises: fs } = await import("fs");
+    const { pathToFileURL } = await import("url");
+    let jsCode = await fs.readFile(jsFile, { encoding: "utf-8" });
+    jsCode = `
+import process from "process";
+import * as path from "path";
+import { createRequire } from "module";
+import { fileURLToPath } from "url";
 
-// src/fetchModule.ts
-var global = globalThis;
-var cache = global.fetchModuleCache || /* @__PURE__ */ new Map();
-var fetchModule = async (url) => {
-  const absoluteUrl = new URL(url, location.href).href;
-  if (cache.has(absoluteUrl))
-    return cache.get(absoluteUrl);
-  let exported;
-  const toExport = {};
-  global.exports = toExport;
-  global.module = { exports: toExport };
-  const esm = await import(
-    /* webpackIgnore: true */
-    absoluteUrl
-  );
-  const esmKeys = Object.keys(esm);
-  if (esmKeys.length)
-    exported = esm;
-  else
-    exported = global.module.exports;
-  delete global.exports;
-  delete global.module;
-  cache.set(absoluteUrl, exported);
-  return exported;
-};
-if (!global.fetchModuleCache)
-  global.fetchModuleCache = cache;
-var fetchModule_default = fetchModule;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const require = createRequire(import.meta.url);
 
-// src/instantiateFFTWModule.ts
-var instantiateFFTWModule = async (jsFile, wasmFile = jsFile.replace(/c?js$/, "wasm")) => {
-  let LibFFTW;
-  try {
-    LibFFTW = __require(jsFile);
-  } catch (error) {
-    LibFFTW = await fetchModule_default(jsFile);
+${jsCode}
+
+export default ${jsCode.match(/var (.+) = \(function\(\) \{/)[1]};
+`;
+    const jsFileMod = jsFile.replace(/c?js$/, "mjs");
+    await fs.writeFile(jsFileMod, jsCode);
+    Module = (await import(
+      /* webpackIgnore: true */
+      pathToFileURL(jsFileMod).href
+    )).default;
+    await fs.unlink(jsFileMod);
+    wasmBinary = (await fs.readFile(wasmFile)).buffer;
   }
-  const locateFile = (url, scriptDirectory) => ({
-    "libfftw3.wasm": wasmFile
-  })[url] || scriptDirectory + url;
-  const libFaust = await LibFFTW({ locateFile });
-  return libFaust;
+  const module = await Module({
+    wasmBinary
+  });
+  return module;
 };
-var instantiateFFTWModule_default = instantiateFFTWModule;
+var instantiateFFTWModuleFromFile_default = instantiateFFTWModuleFromFile;
 
 // src/FFTW.ts
-var FFTW_ESTIMATE = 1 << 6;
-var FFTW_R2HC = 0;
-var FFTW_HC2R = 1;
-var FFTW_REDFT10 = 5;
-var FFTW_REDFT01 = 4;
-var FFTW_RODFT10 = 9;
-var FFTW_RODFT01 = 8;
-var FFTW_FORWARD = -1;
-var FFTW_BACKWARD = 1;
 var FFTW = class {
   constructor(fftwModule) {
+    const FFTW_ESTIMATE = 1 << 6;
+    const FFTW_R2HC = 0;
+    const FFTW_HC2R = 1;
+    const FFTW_DHT = 2;
+    const FFTW_REDFT00 = 3;
+    const FFTW_REDFT10 = 5;
+    const FFTW_REDFT01 = 4;
+    const FFTW_REDFT11 = 6;
+    const FFTW_RODFT00 = 7;
+    const FFTW_RODFT10 = 9;
+    const FFTW_RODFT01 = 8;
+    const FFTW_RODFT11 = 10;
+    const FFTW_FORWARD = -1;
+    const FFTW_BACKWARD = 1;
     const fftwf_plan_dft_r2c_1d = fftwModule.cwrap("fftwf_plan_dft_r2c_1d", "number", ["number", "number", "number", "number"]);
     const fftwf_plan_dft_c2r_1d = fftwModule.cwrap("fftwf_plan_dft_c2r_1d", "number", ["number", "number", "number", "number"]);
     const fftwf_plan_r2r_1d = fftwModule.cwrap("fftwf_plan_r2r_1d", "number", ["number", "number", "number", "number", "number"]);
@@ -231,15 +232,8 @@ var FFTW = class {
   }
 };
 var FFTW_default = FFTW;
-
-// src/index.ts
-var src_default = {
-  instantiateFFTWModule: instantiateFFTWModule_default,
-  FFTW: FFTW_default
-};
 export {
   FFTW_default as FFTW,
-  src_default as default,
-  instantiateFFTWModule_default as instantiateFFTWModule
+  instantiateFFTWModuleFromFile_default as instantiateFFTWModuleFromFile
 };
 //# sourceMappingURL=index.js.map

@@ -1,14 +1,5 @@
-import instantiateFFTWModule from "./instantiateFFTWModule";
-import FFTW from "./FFTW";
+// import * as fftwwasm from "./exports";
+// export default fftwwasm;
+// Bug with dts-bundle-generator
 
-export * from "./types";
-
-export {
-    instantiateFFTWModule,
-    FFTW
-}
-
-export default {
-    instantiateFFTWModule,
-    FFTW
-}
+export * from "./exports";

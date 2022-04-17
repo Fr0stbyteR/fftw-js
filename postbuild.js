@@ -1,37 +1,19 @@
 //@ts-check
-const path = require("path");
-const fs = require("fs");
+// import { cpSync, rmSync } from "./fileutils.js";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
-/**
- * @param {string} src
- * @param {string} dest
- */
-const cpSync = (src, dest) => {
-    if (!fs.existsSync(src)) return;
-    if (fs.lstatSync(src).isDirectory()) {
-        if (!fs.existsSync(dest)) fs.mkdirSync(dest);
-        fs.readdirSync(src).forEach(child => cpSync(path.join(src, child), path.join(dest, child)));
-    } else {
-        fs.copyFileSync(src, dest);
-    }
-};
+// @ts-ignore
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// @ts-ignore
+const __filename = fileURLToPath(import.meta.url);
 
-/**
- * @param {string} dir
- */
- const rmSync = (dir) => {
-    if (!fs.existsSync(dir)) return;
-    if (fs.lstatSync(dir).isDirectory()) {
-        fs.readdirSync(dir).forEach(child => rmSync(path.join(dir, child)));
-        fs.rmdirSync(dir);
-    } else {
-        fs.unlinkSync(dir);
-    }
-};
+const distPath = path.join(__dirname, "./dist/cjs");
+const distEsmPath = path.join(__dirname, "./dist/esm");
+const distBundlePath = path.join(__dirname, "./dist/cjs-bundle");
+const distEsmBundlePath = path.join(__dirname, "./dist/esm-bundle");
+fs.copyFileSync(path.join(distPath, "index.d.ts"), path.join(distEsmPath, "index.d.ts"));
+fs.copyFileSync(path.join(distBundlePath, "index.d.ts"), path.join(distEsmBundlePath, "index.d.ts"));
 
-const fftwWasmDistPath = path.join(__dirname, "./dist");
-const fftwWasmDistEsmPath = path.join(__dirname, "./dist/esm");
-
-fs.copyFileSync(path.join(fftwWasmDistPath, "index.d.ts"), path.join(fftwWasmDistEsmPath, "index.d.ts"));
-
-module.exports = { cpSync, rmSync };
+console.log("dts files copied.")

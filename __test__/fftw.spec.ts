@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { instantiateFFTWModule, FFTW } from "../dist/index.js";
+import { instantiateFFTWModule, FFTW } from "../dist/esm-bundle/index.js";
 import type { FFTWModule } from "../src/types";
 import A2_1024 from './audioBuffer.js';
 
@@ -50,7 +50,7 @@ let Module: FFTWModule;
 let fftw: FFTW;
 
 beforeAll(async () => {
-    Module = await instantiateFFTWModule(fftModuleJsPath);
+    Module = await instantiateFFTWModule();
     testVectors = JSON.parse(fs.readFileSync(testVectorsFilePath, { encoding: "utf-8" }));
     fftw = new FFTW(Module);
 });
