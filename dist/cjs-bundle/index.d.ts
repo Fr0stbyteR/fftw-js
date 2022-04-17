@@ -13,12 +13,12 @@ export interface FFT {
 	inverse(arr: ArrayLike<number>): Float32Array;
 	dispose(): void;
 }
-export declare const LibFFTW: FFTWModuleFactory;
-export declare const LibFFTWWasm: Uint8Array;
+export declare const FFTWModuleFactoryFn: FFTWModuleFactory;
+export declare const FFTWModuleFactoryWasm: Uint8Array;
 /**
  * Instantiate EMCC Module using bundled binaries. Module constructor and files can be overriden.
  */
-export declare const instantiateFFTWModule: (ModuleIn?: FFTWModuleFactory, wasmBinaryIn?: Uint8Array) => Promise<FFTWModule>;
+export declare const instantiateFFTWModule: (ModuleFactoryIn?: FFTWModuleFactory, wasmBinaryIn?: Uint8Array) => Promise<FFTWModule>;
 /**
  * Load emcc-wasm files, than instantiate it
  * @param jsFile path to `emcc-wasm.js`
