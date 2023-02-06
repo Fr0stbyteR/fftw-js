@@ -1,11 +1,13 @@
 // src/instantiateFFTWModuleFromFile.ts
 var instantiateFFTWModuleFromFile = async (jsFile, wasmFile = jsFile.replace(/c?js$/, "wasm"), dataFile = jsFile.replace(/c?js$/, "data")) => {
+  var _a, _b;
   let Module;
   let wasmBinary;
+  const jsCodeHead = /var (.+) = \(\(\) => \{/;
   if (typeof globalThis.fetch === "function") {
     let jsCode = await (await fetch(jsFile)).text();
     jsCode = `${jsCode}
-export default ${jsCode.match(/var (.+) = \(function\(\) \{/)[1]};
+export default ${(_a = jsCode.match(jsCodeHead)) == null ? void 0 : _a[1]};
 `;
     const jsFileMod = URL.createObjectURL(new Blob([jsCode], { type: "text/javascript" }));
     Module = (await import(
@@ -29,7 +31,7 @@ const require = createRequire(import.meta.url);
 
 ${jsCode}
 
-export default ${jsCode.match(/var (.+) = \(function\(\) \{/)[1]};
+export default ${(_b = jsCode.match(jsCodeHead)) == null ? void 0 : _b[1]};
 `;
     const jsFileMod = jsFile.replace(/c?js$/, "mjs");
     await fs.writeFile(jsFileMod, jsCode);
