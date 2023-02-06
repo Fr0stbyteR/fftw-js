@@ -28,4 +28,4 @@ libfftw3.js: $(FFTW_STATIC_LIB)
 	emcc $(OPTIMIZE) $(OPTIONS) -o $@ $^
 
 clean:
-	rm -f FFTW.js FFTW.wasm
+	rm -f libfftw3.js libfftw3.wasm
