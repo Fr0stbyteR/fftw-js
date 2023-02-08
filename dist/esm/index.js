@@ -91,14 +91,20 @@ var FFTW = class {
         this.iplan = _fftwf_plan_dft_2d(this.n0, this.n1, this.c1ptr, this.c0ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
       }
       forward(cpx) {
-        this.c0.set(cpx);
+        if (typeof cpx === "function")
+          cpx(this.c0);
+        else
+          this.c0.set(cpx);
         _fftwf_execute(this.fplan);
-        return new Float32Array(fftwModule.HEAPU8.buffer, this.c1ptr, 2 * this.size);
+        return this.c1;
       }
       inverse(cpx) {
-        this.c1.set(cpx);
+        if (typeof cpx === "function")
+          cpx(this.c1);
+        else
+          this.c1.set(cpx);
         _fftwf_execute(this.iplan);
-        return new Float32Array(fftwModule.HEAPU8.buffer, this.c0ptr, 2 * this.size);
+        return this.c0;
       }
       dispose() {
         _fftwf_destroy_plan(this.fplan);
@@ -110,22 +116,28 @@ var FFTW = class {
     class C2CFFT1D {
       constructor(size) {
         this.size = size;
-        this.c0ptr = _fftwf_malloc(2 * 4 * this.size);
-        this.c1ptr = _fftwf_malloc(2 * 4 * this.size);
+        this.c0ptr = _fftwf_malloc(2 * 4 * size);
+        this.c1ptr = _fftwf_malloc(2 * 4 * size);
         this.c0 = new Float32Array(fftwModule.HEAPU8.buffer, this.c0ptr, 2 * size);
         this.c1 = new Float32Array(fftwModule.HEAPU8.buffer, this.c1ptr, 2 * size);
         this.fplan = _fftwf_plan_dft_1d(size, this.c0ptr, this.c1ptr, FFTW_FORWARD, FFTW_ESTIMATE);
         this.iplan = _fftwf_plan_dft_1d(size, this.c1ptr, this.c0ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
       }
       forward(cpx) {
-        this.c0.set(cpx);
+        if (typeof cpx === "function")
+          cpx(this.c0);
+        else
+          this.c0.set(cpx);
         _fftwf_execute(this.fplan);
-        return new Float32Array(fftwModule.HEAPU8.buffer, this.c1ptr, 2 * this.size);
+        return this.c1;
       }
       inverse(cpx) {
-        this.c1.set(cpx);
+        if (typeof cpx === "function")
+          cpx(this.c1);
+        else
+          this.c1.set(cpx);
         _fftwf_execute(this.iplan);
-        return new Float32Array(fftwModule.HEAPU8.buffer, this.c0ptr, 2 * this.size);
+        return this.c0;
       }
       dispose() {
         _fftwf_destroy_plan(this.fplan);
@@ -145,14 +157,20 @@ var FFTW = class {
         this.iplan = _fftwf_plan_dft_c2r_1d(size, this.cptr, this.rptr, FFTW_ESTIMATE);
       }
       forward(real) {
-        this.r.set(real);
+        if (typeof real === "function")
+          real(this.r);
+        else
+          this.r.set(real);
         _fftwf_execute(this.fplan);
-        return new Float32Array(fftwModule.HEAPU8.buffer, this.cptr, this.size + 2);
+        return this.c;
       }
       inverse(cpx) {
-        this.c.set(cpx);
+        if (typeof cpx === "function")
+          cpx(this.c);
+        else
+          this.c.set(cpx);
         _fftwf_execute(this.iplan);
-        return new Float32Array(fftwModule.HEAPU8.buffer, this.rptr, this.size);
+        return this.r;
       }
       dispose() {
         _fftwf_destroy_plan(this.fplan);
@@ -172,14 +190,20 @@ var FFTW = class {
           this.iplan = _fftwf_plan_r2r_1d(size, this.cptr, this.rptr, inverseType, FFTW_ESTIMATE);
         }
         forward(real) {
-          this.r.set(real);
+          if (typeof real === "function")
+            real(this.r);
+          else
+            this.r.set(real);
           _fftwf_execute(this.fplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.cptr, this.size);
+          return this.c;
         }
         inverse(cpx) {
-          this.c.set(cpx);
+          if (typeof cpx === "function")
+            cpx(this.c);
+          else
+            this.c.set(cpx);
           _fftwf_execute(this.iplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.rptr, this.size);
+          return this.r;
         }
         dispose() {
           _fftwf_destroy_plan(this.fplan);
@@ -202,14 +226,20 @@ var FFTW = class {
           this.iplan = _fftwf_plan_r2r_2d(this.n0, this.n1, this.cptr, this.rptr, inverseType, inverseType, FFTW_ESTIMATE);
         }
         forward(real) {
-          this.r.set(real);
+          if (typeof real === "function")
+            real(this.r);
+          else
+            this.r.set(real);
           _fftwf_execute(this.fplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.cptr, this.size);
+          return this.c;
         }
         inverse(cpx) {
-          this.c.set(cpx);
+          if (typeof cpx === "function")
+            cpx(this.c);
+          else
+            this.c.set(cpx);
           _fftwf_execute(this.iplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.rptr, this.size);
+          return this.r;
         }
         dispose() {
           _fftwf_destroy_plan(this.fplan);

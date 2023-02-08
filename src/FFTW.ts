@@ -60,16 +60,18 @@ class FFTW {
                 this.iplan = _fftwf_plan_dft_2d(this.n0, this.n1, this.c1ptr, this.c0ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
             }
 
-            forward(cpx: ArrayLike<number>) {
-                this.c0.set(cpx);
+            forward(cpx: ArrayLike<number> | ((cpx: Float32Array) => any)) {
+                if (typeof cpx === "function") cpx(this.c0);
+                else this.c0.set(cpx);
                 _fftwf_execute(this.fplan);
-                return new Float32Array(fftwModule.HEAPU8.buffer, this.c1ptr, 2 * this.size);
+                return this.c1;
             }
 
-            inverse(cpx: ArrayLike<number>) {
-                this.c1.set(cpx);
+            inverse(cpx: ArrayLike<number> | ((cpx: Float32Array) => any)) {
+                if (typeof cpx === "function") cpx(this.c1);
+                else this.c1.set(cpx);
                 _fftwf_execute(this.iplan);
-                return new Float32Array(fftwModule.HEAPU8.buffer, this.c0ptr, 2 * this.size);
+                return this.c0;
             }
 
             dispose() {
@@ -92,8 +94,8 @@ class FFTW {
                 this.size = size;
                 // this.c0ptr = _fftwf_malloc(2*4*size + 2*4*size);
                 // this.c1ptr = this.c0ptr;
-                this.c0ptr = _fftwf_malloc(2 * 4 * this.size);
-                this.c1ptr = _fftwf_malloc(2 * 4 * this.size);
+                this.c0ptr = _fftwf_malloc(2 * 4 * size);
+                this.c1ptr = _fftwf_malloc(2 * 4 * size);
 
                 this.c0 = new Float32Array(fftwModule.HEAPU8.buffer, this.c0ptr, 2 * size);
                 this.c1 = new Float32Array(fftwModule.HEAPU8.buffer, this.c1ptr, 2 * size);
@@ -102,16 +104,18 @@ class FFTW {
                 this.iplan = _fftwf_plan_dft_1d(size, this.c1ptr, this.c0ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
             }
 
-            forward(cpx: ArrayLike<number>) {
-                this.c0.set(cpx);
+            forward(cpx: ArrayLike<number> | ((cpx: Float32Array) => any)) {
+                if (typeof cpx === "function") cpx(this.c0);
+                else this.c0.set(cpx);
                 _fftwf_execute(this.fplan);
-                return new Float32Array(fftwModule.HEAPU8.buffer, this.c1ptr, 2 * this.size);
+                return this.c1;
             }
 
-            inverse(cpx: ArrayLike<number>) {
-                this.c1.set(cpx);
+            inverse(cpx: ArrayLike<number> | ((cpx: Float32Array) => any)) {
+                if (typeof cpx === "function") cpx(this.c1);
+                else this.c1.set(cpx);
                 _fftwf_execute(this.iplan);
-                return new Float32Array(fftwModule.HEAPU8.buffer, this.c0ptr, 2 * this.size);
+                return this.c0;
             }
 
             dispose() {
@@ -142,16 +146,18 @@ class FFTW {
                 this.iplan = _fftwf_plan_dft_c2r_1d(size, this.cptr, this.rptr, FFTW_ESTIMATE);
             }
 
-            forward(real: ArrayLike<number>) {
-                this.r.set(real);
+            forward(real: ArrayLike<number> | ((real: Float32Array) => any)) {
+                if (typeof real === "function") real(this.r);
+                else this.r.set(real);
                 _fftwf_execute(this.fplan);
-                return new Float32Array(fftwModule.HEAPU8.buffer, this.cptr, this.size + 2);
+                return this.c;
             }
 
-            inverse(cpx: ArrayLike<number>) {
-                this.c.set(cpx);
+            inverse(cpx: ArrayLike<number> | ((cpx: Float32Array) => any)) {
+                if (typeof cpx === "function") cpx(this.c);
+                else this.c.set(cpx);
                 _fftwf_execute(this.iplan);
-                return new Float32Array(fftwModule.HEAPU8.buffer, this.rptr, this.size);
+                return this.r;
             }
 
             dispose() {
@@ -182,16 +188,18 @@ class FFTW {
                     this.iplan = _fftwf_plan_r2r_1d(size, this.cptr, this.rptr, inverseType, FFTW_ESTIMATE);
                 }
 
-                forward(real: ArrayLike<number>) {
-                    this.r.set(real);
+                forward(real: ArrayLike<number> | ((real: Float32Array) => any)) {
+                    if (typeof real === "function") real(this.r);
+                    else this.r.set(real);
                     _fftwf_execute(this.fplan);
-                    return new Float32Array(fftwModule.HEAPU8.buffer, this.cptr, this.size);
+                    return this.c;
                 }
 
-                inverse(cpx: ArrayLike<number>) {
-                    this.c.set(cpx);
+                inverse(cpx: ArrayLike<number> | ((cpx: Float32Array) => any)) {
+                    if (typeof cpx === "function") cpx(this.c);
+                    else this.c.set(cpx);
                     _fftwf_execute(this.iplan);
-                    return new Float32Array(fftwModule.HEAPU8.buffer, this.rptr, this.size);
+                    return this.r;
                 }
 
                 dispose() {
@@ -228,16 +236,18 @@ class FFTW {
                     this.iplan = _fftwf_plan_r2r_2d(this.n0, this.n1, this.cptr, this.rptr, inverseType, inverseType, FFTW_ESTIMATE);
                 }
                 
-                forward(real: ArrayLike<number>) {
-                    this.r.set(real);
+                forward(real: ArrayLike<number> | ((real: Float32Array) => any)) {
+                    if (typeof real === "function") real(this.r);
+                    else this.r.set(real);
                     _fftwf_execute(this.fplan);
-                    return new Float32Array(fftwModule.HEAPU8.buffer, this.cptr, this.size);
+                    return this.c;
                 }
 
-                inverse(cpx: ArrayLike<number>) {
-                    this.c.set(cpx);
+                inverse(cpx: ArrayLike<number> | ((cpx: Float32Array) => any)) {
+                    if (typeof cpx === "function") cpx(this.c);
+                    else this.c.set(cpx);
                     _fftwf_execute(this.iplan);
-                    return new Float32Array(fftwModule.HEAPU8.buffer, this.rptr, this.size);
+                    return this.r;
                 }
 
                 dispose() {

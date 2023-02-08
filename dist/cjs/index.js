@@ -5,6 +5,7 @@
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
   var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
     get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
   }) : x)(function(x) {
@@ -12,18 +13,17 @@
       return require.apply(this, arguments);
     throw new Error('Dynamic require of "' + x + '" is not supported');
   });
-  var __copyProps = (to, from, except, desc) => {
-    if (from && typeof from === "object" || typeof from === "function") {
-      for (let key of __getOwnPropNames(from))
-        if (!__hasOwnProp.call(to, key) && key !== except)
-          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  var __reExport = (target, module, desc) => {
+    if (module && typeof module === "object" || typeof module === "function") {
+      for (let key of __getOwnPropNames(module))
+        if (!__hasOwnProp.call(target, key) && key !== "default")
+          __defProp(target, key, { get: () => module[key], enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable });
     }
-    return to;
+    return target;
   };
-  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-    mod
-  ));
+  var __toModule = (module) => {
+    return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
+  };
 
   // src/instantiateFFTWModuleFromFile.ts
   var instantiateFFTWModuleFromFile = async (jsFile, wasmFile = jsFile.replace(/c?js$/, "wasm"), dataFile = jsFile.replace(/c?js$/, "data")) => {
@@ -118,14 +118,20 @@ export default ${(_b = jsCode.match(jsCodeHead)) == null ? void 0 : _b[1]};
           this.iplan = _fftwf_plan_dft_2d(this.n0, this.n1, this.c1ptr, this.c0ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
         }
         forward(cpx) {
-          this.c0.set(cpx);
+          if (typeof cpx === "function")
+            cpx(this.c0);
+          else
+            this.c0.set(cpx);
           _fftwf_execute(this.fplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.c1ptr, 2 * this.size);
+          return this.c1;
         }
         inverse(cpx) {
-          this.c1.set(cpx);
+          if (typeof cpx === "function")
+            cpx(this.c1);
+          else
+            this.c1.set(cpx);
           _fftwf_execute(this.iplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.c0ptr, 2 * this.size);
+          return this.c0;
         }
         dispose() {
           _fftwf_destroy_plan(this.fplan);
@@ -137,22 +143,28 @@ export default ${(_b = jsCode.match(jsCodeHead)) == null ? void 0 : _b[1]};
       class C2CFFT1D {
         constructor(size) {
           this.size = size;
-          this.c0ptr = _fftwf_malloc(2 * 4 * this.size);
-          this.c1ptr = _fftwf_malloc(2 * 4 * this.size);
+          this.c0ptr = _fftwf_malloc(2 * 4 * size);
+          this.c1ptr = _fftwf_malloc(2 * 4 * size);
           this.c0 = new Float32Array(fftwModule.HEAPU8.buffer, this.c0ptr, 2 * size);
           this.c1 = new Float32Array(fftwModule.HEAPU8.buffer, this.c1ptr, 2 * size);
           this.fplan = _fftwf_plan_dft_1d(size, this.c0ptr, this.c1ptr, FFTW_FORWARD, FFTW_ESTIMATE);
           this.iplan = _fftwf_plan_dft_1d(size, this.c1ptr, this.c0ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
         }
         forward(cpx) {
-          this.c0.set(cpx);
+          if (typeof cpx === "function")
+            cpx(this.c0);
+          else
+            this.c0.set(cpx);
           _fftwf_execute(this.fplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.c1ptr, 2 * this.size);
+          return this.c1;
         }
         inverse(cpx) {
-          this.c1.set(cpx);
+          if (typeof cpx === "function")
+            cpx(this.c1);
+          else
+            this.c1.set(cpx);
           _fftwf_execute(this.iplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.c0ptr, 2 * this.size);
+          return this.c0;
         }
         dispose() {
           _fftwf_destroy_plan(this.fplan);
@@ -172,14 +184,20 @@ export default ${(_b = jsCode.match(jsCodeHead)) == null ? void 0 : _b[1]};
           this.iplan = _fftwf_plan_dft_c2r_1d(size, this.cptr, this.rptr, FFTW_ESTIMATE);
         }
         forward(real) {
-          this.r.set(real);
+          if (typeof real === "function")
+            real(this.r);
+          else
+            this.r.set(real);
           _fftwf_execute(this.fplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.cptr, this.size + 2);
+          return this.c;
         }
         inverse(cpx) {
-          this.c.set(cpx);
+          if (typeof cpx === "function")
+            cpx(this.c);
+          else
+            this.c.set(cpx);
           _fftwf_execute(this.iplan);
-          return new Float32Array(fftwModule.HEAPU8.buffer, this.rptr, this.size);
+          return this.r;
         }
         dispose() {
           _fftwf_destroy_plan(this.fplan);
@@ -199,14 +217,20 @@ export default ${(_b = jsCode.match(jsCodeHead)) == null ? void 0 : _b[1]};
             this.iplan = _fftwf_plan_r2r_1d(size, this.cptr, this.rptr, inverseType, FFTW_ESTIMATE);
           }
           forward(real) {
-            this.r.set(real);
+            if (typeof real === "function")
+              real(this.r);
+            else
+              this.r.set(real);
             _fftwf_execute(this.fplan);
-            return new Float32Array(fftwModule.HEAPU8.buffer, this.cptr, this.size);
+            return this.c;
           }
           inverse(cpx) {
-            this.c.set(cpx);
+            if (typeof cpx === "function")
+              cpx(this.c);
+            else
+              this.c.set(cpx);
             _fftwf_execute(this.iplan);
-            return new Float32Array(fftwModule.HEAPU8.buffer, this.rptr, this.size);
+            return this.r;
           }
           dispose() {
             _fftwf_destroy_plan(this.fplan);
@@ -229,14 +253,20 @@ export default ${(_b = jsCode.match(jsCodeHead)) == null ? void 0 : _b[1]};
             this.iplan = _fftwf_plan_r2r_2d(this.n0, this.n1, this.cptr, this.rptr, inverseType, inverseType, FFTW_ESTIMATE);
           }
           forward(real) {
-            this.r.set(real);
+            if (typeof real === "function")
+              real(this.r);
+            else
+              this.r.set(real);
             _fftwf_execute(this.fplan);
-            return new Float32Array(fftwModule.HEAPU8.buffer, this.cptr, this.size);
+            return this.c;
           }
           inverse(cpx) {
-            this.c.set(cpx);
+            if (typeof cpx === "function")
+              cpx(this.c);
+            else
+              this.c.set(cpx);
             _fftwf_execute(this.iplan);
-            return new Float32Array(fftwModule.HEAPU8.buffer, this.rptr, this.size);
+            return this.r;
           }
           dispose() {
             _fftwf_destroy_plan(this.fplan);
