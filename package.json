@@ -1,6 +1,6 @@
 {
   "name": "@shren/fftw-js",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Javascript port of FFTW via Emscripten",
   "main": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
